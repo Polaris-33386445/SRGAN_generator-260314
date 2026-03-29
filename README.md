@@ -1,0 +1,6 @@
+通过Super Resolution GAN(SRGAN)实现图像超分辨生成，训练生成器尽可能使SR=G(LR)骗过判别器，使判别器混淆SR和Original HR：
+定义生成器对抗损失gen_adv_loss=-ln(P(D(SR)=1))，当判别器过强时P(D(SR)==1)->0，gen_adv_loss->float('inf')；当生成器过强时P(D(SR)==1)->0.5，gen_adv_loss->0.6931。
+定义判别器对抗损失disc_adv_loss=-ln(1-P(D(SR)=1))-ln(P(D(HR)=1))，训练判别器尽可能辨认SR=0(False)和HR=1(True)。
+截取VGG19第5池化层前的第4卷积层后（含relu激活层），作为特征提取器，用VGG19(5,4)特征图像的MSE损失代替SR与HR原图的MSE损失，避免模型在学习中为了最小化内容损失content_loss丢失风格。
+采用G2D1交替训练策略，控制G.lr=1e-4，D.lr=1e-5，beta=1e-3(total_loss=content_loss+beta*gen_adv_loss)不变，研究判别器网络深度D.num_blocks=4/8对benchmark PSNR/SSIM的影响......
+单图推理demo包含插值算法得到的超分辨率图像(bicubic)、SRGAN生成的超分辨率图像(SR)、原始高分辨率图像(HR)......
